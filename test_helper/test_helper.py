@@ -101,10 +101,10 @@ class Test(object):
     def euclideanDistMatrix(cls, a, b, det, msg="", msg_success=""):
         if type(a) != np.ndarray or type(b) != np.ndarray:
             print 'Arrays "a" and "b" should numpy arrays'
-            assertEquals(False, True, msg, msg_success)
+            cls.assertEquals(False, True, msg, msg_success)
         mask = lambda x: len(zip(*np.where((x < -100) | (x > 100)))) == 0 and x.dtype == 'int32'
         if not mask(a) or not mask(b):
             print 'Arrays "a" and "b" should contains integer numbers from -100 to 100'
-            assertEquals(False, True, msg, msg_success)
+            cls.assertEquals(False, True, msg, msg_success)
         c = np.sqrt(np.power(a,2) + np.power(b,2))
-        assertEquals(det, np.linalg.det(c), msg, msg_success)
+        cls.assertEquals(det, np.linalg.det(c), msg, msg_success)
