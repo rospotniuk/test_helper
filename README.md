@@ -4,5 +4,5 @@ This is an extended version of <a href="https://github.com/hpec/test_helper">htt
 
 ### Instalation
 
-1. pip install test_helper
-2. pip install --upgrade git+https://github.com/rospotniuk/test_helper.git  
+1. `pip install test_helper`
+2. `pip install --upgrade git+https://github.com/rospotniuk/test_helper.git`
