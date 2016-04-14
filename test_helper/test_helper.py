@@ -1,6 +1,11 @@
 import hashlib
 from PIL import Image
 import numpy as np
+import requests
+from requests_oauthlib import OAuth1
+from dateutil import parser
+import tweepy
+import json
 
 
 class TestFailure(Exception):
@@ -102,9 +107,94 @@ class Test(object):
         if type(a) != np.ndarray or type(b) != np.ndarray:
             print 'Arrays "a" and "b" should numpy arrays'
             cls.assertEquals(False, True, msg, msg_success)
+            return
         mask = lambda x: len(zip(*np.where((x < -100) | (x > 100)))) == 0 and x.dtype == 'int32'
         if not mask(a) or not mask(b):
             print 'Arrays "a" and "b" should contains integer numbers from -100 to 100'
             cls.assertEquals(False, True, msg, msg_success)
+            return
         c = np.sqrt(np.power(a,2) + np.power(b,2))
         cls.assertEquals(det, np.linalg.det(c), msg, msg_success)
+        
+    # Lab 8.1 Ex.1
+    @classmethod
+    def twitterFriendsList(cls, friends, url, auth, params, msg="", msg_success=""):
+        res = requests.get(url, auth=auth, params=params)
+        data = res.json()
+        fr = []
+        for i in data['users']:
+            fr.append({'name': i['name'], 'followers_count': i['followers_count']})
+        fr.sort(key=lambda x: -x['followers_count'])
+        cls.assertEquals(friends, fr, msg, msg_success)
+        
+    # Lab 8.1 Ex.2
+    @classmethod
+    def twitterRecentTweets(cls, tweets, url, auth, params, msg="", msg_success=""):
+        res = requests.get(url, auth=auth, params=params)
+        data = res.json()
+        result = []
+        for i in data:
+            if i['retweet_count'] > 0:
+                result.append({
+                        'created_at':i['created_at'], 
+                        'author':i['user']['name'], 
+                        'text':i['text'], 
+                        'retweet_count': i['retweet_count']
+                    })
+        cls.assertEquals(tweets, result, msg, msg_success)
+        
+    # Lab 8.1 Ex.3
+    @classmethod
+    def twitterHashtagsTweets(cls, tweets, url, msg="", msg_success=""):
+        if url != 'https://stream.twitter.com/1.1/statuses/filter.json?track=twitter,tweet,world':
+            cls.assertEquals(True, False, 'Incorrect URL', '')
+            return
+        if !isinstance(tweets, list):
+            cls.assertEquals(True, False, 'Incorrect data type', '')
+            return
+        if isinstance(tweets, list) and len(tweets) != 5:
+            cls.assertEquals(True, False, 'Incorrect content', '')
+            return
+        if isinstance(tweets, list) and len(tweets) == 5 and False in map(lambda x: isinstance(x, list), tweets):
+            cls.assertEquals(True, False, 'Incorrect content', '')
+            return
+        i = 0
+        while True:
+            try:
+                x = tweets[0][i]['created_at']
+                break
+            except:
+                i += 1
+        i = -1
+        while True:
+            try:
+                y = tweets[4][i]['created_at']
+                break
+            except:
+                i -= 1
+        diff = parser.parse(y).minute*60 + parser.parse(y).second - (parser.parse(x).minute*60 + parser.parse(x).second)
+        cls.assertEquals(0 < diff <= 300, True, msg, msg_success)
+    
+    # Lab 8.1 Ex.3
+    @classmethod
+    def twitterHashtagsTweetsCount(cls, amount_list, tweets, url, msg="", msg_success=""):
+        if url != 'https://stream.twitter.com/1.1/statuses/filter.json?track=twitter,tweet,world':
+            cls.assertEquals(True, False, 'Incorrect URL', '')
+        try:
+            x = []
+            for group in tweets:
+                c = 0
+                for i in group:
+                    if ('lang' in i and i['lang'] == 'en') or ('user' in i and i['user']['followers_count'] > 1000):
+                        c += 1
+                x.append(c)
+            cls.assertEquals(x, amount_list, msg, msg_success)
+        except:
+            cls.assertEquals(False, True, msg, msg_success)
+    
+    # Lab 8.1 Ex.4
+    @classmethod
+    def twitterBillGates(cls, data, api, msg="", msg_success=""):
+        BillGates = api.get_user("BillGates")
+        result = {'created_at': BillGates.created_at, 'last_tweet_text': api.home_timeline(BillGates.id)[0].text}
+        cls.assertEquals(data, result, msg, msg_success)
