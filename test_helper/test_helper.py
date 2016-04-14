@@ -149,7 +149,7 @@ class Test(object):
         if url != 'https://stream.twitter.com/1.1/statuses/filter.json?track=twitter,tweet,world':
             cls.assertEquals(True, False, 'Incorrect URL', '')
             return
-        if !isinstance(tweets, list):
+        if not isinstance(tweets, list):
             cls.assertEquals(True, False, 'Incorrect data type', '')
             return
         if isinstance(tweets, list) and len(tweets) != 5:
@@ -173,13 +173,14 @@ class Test(object):
             except:
                 i -= 1
         diff = parser.parse(y).minute*60 + parser.parse(y).second - (parser.parse(x).minute*60 + parser.parse(x).second)
-        cls.assertEquals(0 < diff <= 300, True, msg, msg_success)
+        cls.assertEquals(0 < diff <= 301, True, msg, msg_success)
     
     # Lab 8.1 Ex.3
     @classmethod
     def twitterHashtagsTweetsCount(cls, amount_list, tweets, url, msg="", msg_success=""):
         if url != 'https://stream.twitter.com/1.1/statuses/filter.json?track=twitter,tweet,world':
             cls.assertEquals(True, False, 'Incorrect URL', '')
+            return
         try:
             x = []
             for group in tweets:
