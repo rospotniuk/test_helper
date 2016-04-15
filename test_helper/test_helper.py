@@ -6,6 +6,7 @@ from requests_oauthlib import OAuth1
 from dateutil import parser
 import tweepy
 import json
+from datetime import timedelta
 
 
 class TestFailure(Exception):
@@ -198,4 +199,164 @@ class Test(object):
     def twitterBillGates(cls, data, api, msg="", msg_success=""):
         BillGates = api.get_user("BillGates")
         result = {'created_at': BillGates.created_at, 'last_tweet_text': api.home_timeline(BillGates.id)[0].text}
+        cls.assertEquals(data, result, msg, msg_success)
+
+    # Lab 8.2 Ex.5.1
+    @classmethod
+    def existRecords(cls, key, client, msg="", msg_success=""):
+        cls.assertEquals(True, client.twitter.tweets.distinct(key) and client.twitter.users.distinct(key), msg, msg_success)
+
+    # Lab 8.2 Ex.5.2
+    @classmethod
+    def countRecord(cls, data, client, msg="", msg_success=""):
+        result = client.twitter.tweets.count()
+        cls.assertEquals(10000, result, msg, msg_success)
+    # Lab 8.2 Ex.5.3
+    
+    @classmethod
+    def existField(cls, data, client, msg="", msg_success=""):
+        q_t = {
+            "created_at": {"$exists": True},
+            "author_id": {"$exists": True},
+            "author_name": {"$exists": True},
+            "retweet_count": {"$exists": True},
+            "id": {"$exists": True},
+            "lang": {"$exists": True},
+            "source": {"$exists": True},
+            "text": {"$exists": True}
+        }
+        q_u = {
+            "created_at": {"$exists": True},
+            "id": {"$exists": True},
+            "name": {"$exists": True},
+            "description": {"$exists": True},
+            "followers_count": {"$exists": True},
+            "friends_count": {"$exists": True},
+            "lang": {"$exists": True},
+            "profile_image_url": {"$exists": True},
+            "location": {"$exists": True},
+            "time_zone": {"$exists": True},
+            "tweets": {"$exists": True}
+        }
+        result = client.twitter.tweets.count() == client.twitter.tweets.count(q_t) \
+                 and client.twitter.users.count() == client.twitter.users.count(q_u)
+        cls.assertEquals(True, result, msg, msg_success)
+        
+    # Lab 8.2 Ex.5.4
+    @classmethod
+    def uniqueRecord(cls, data, client, msg="", msg_success=""):
+        result = client.twitter.tweets.distinct('id') == client.twitter.tweets.count() \
+                 and client.twitter.users.distinct('id') == client.twitter.users.count():
+        cls.assertEquals(True, result, msg, msg_success)
+
+    # Lab 8.2 Ex.5.5
+    @classmethod
+    def bigDataTweets(cls, data, client, msg="", msg_success=""):
+        td = timedelta(minutes=30)
+        start = list(client.twitter.tweets.aggregate([{"$sort":{"created_at":1}},{"$limit":1},{"$project": {"created_at":1}}]))[0]['created_at']
+        end = list(client.twitter.tweets.aggregate([{"$sort":{"created_at":-1}},{"$limit":1},{"$project": {"created_at":1}}]))[0]['created_at']
+        data = list(client.twitter.tweets.aggregate([{
+                    "$match":{
+                        "text":{"$regex":"#BigData"},
+                        "retweet_count":0,
+                        "created_at":{"$lte":end-td}
+                    }
+                }]))
+        col_name = 'bigdata_tweets_'+start.strftime("%Y-%m-%d %H:%M:%S")+'_'+end.strftime("%Y-%m-%d %H:%M:%S")
+        result = client.twitter[col_name].count() == len(data)
+        cls.assertEquals(True, result, msg, msg_success)
+
+    # Lab 8.2 Ex.5.6
+    @classmethod
+    def top5Tweets(cls, data, client, msg="", msg_success=""):
+        q = [
+            {
+                "$group": {
+                    "_id": {
+                        "lang": "$lang"
+                    }
+                }
+            },
+            {"$project": 
+                 {"_id":1}
+            }
+        ]
+        result = {}
+        for lang in list(client.twitter.tweets.aggregate(q)):
+            query = [
+                    {
+                        "$match":{
+                            "lang":lang['_id']['lang']
+                        }
+                    },
+                    {
+                      "$sort":  {
+                            "retweet_count": -1,
+                            "created_at": 1
+                        }
+                    },
+                    {"$project": 
+                         {"created_at":1,"author_name":1,"text":1,"_id":-1}
+                    },
+                    {
+                        "$limit":5
+                    }
+                ]
+            result[lang['_id']['lang']] = []
+            for i in list(client.twitter.tweets.aggregate(query)):
+                del(i['_id'])
+                result[lang['_id']['lang']].append(i)
+        cls.assertEquals(data, result, msg, msg_success)
+
+    # Lab 8.2 Ex.5.7.0
+    @classmethod
+    def GetTweetsByIDS(cls,ids,client):
+        ids = list(set(ids))
+        result = {}
+        for i in list(client.twitter.tweets.aggregate([
+                {"$match": {"id":{"$in":ids}}},
+                {"$project": {'_id':-1,"id":1,"created_at":1,"text":1}}
+            ])):
+            del(i['_id'])
+            t = i.copy()
+            del(t['id'])
+            result[i['id']] = t
+        return result.values()
+
+    # Lab 8.2 Ex.5.7
+    @classmethod
+    def timeZoneTweets(cls, data, client, msg="", msg_success=""):
+        result = {}
+        for i in list(client.twitter.users.aggregate([{"$group": {"_id": {"time_zone": "$time_zone"}}}])):
+            q = [
+                {
+                   "$match": { 
+                        "time_zone":i['_id']['time_zone'],
+                        "$or":[
+                            {"lang":"en"},
+                            {"lang":"es"},
+                            {"lang":"fr"}
+                        ]
+                    }
+                },
+                {"$project": 
+                     {"name":1,"profile_image_url":1,"tweets":1,"ff":{"$add":["$friends_count","$followers_count"]}}
+                },
+                {
+                    "$sort": {
+                        "ff":-1
+                    }
+                },
+                {
+                    "$limit":1
+                },
+                {"$project": 
+                     {"name":1,"profile_image_url":1,"tweets":1}
+                }
+            ]
+            t = list(client.twitter.users.aggregate(q))
+            if(len(t)):
+                del(t[0]['_id'])
+                t[0]['tweets'] = cls.GetTweetsByIDS(t[0]['tweets'],client)
+                result[i['_id']['time_zone']] = t[0]
         cls.assertEquals(data, result, msg, msg_success)
