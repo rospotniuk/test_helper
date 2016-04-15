@@ -246,7 +246,7 @@ class Test(object):
     @classmethod
     def uniqueRecord(cls, data, client, msg="", msg_success=""):
         result = client.twitter.tweets.distinct('id') == client.twitter.tweets.count() \
-                 and client.twitter.users.distinct('id') == client.twitter.users.count():
+                 and client.twitter.users.distinct('id') == client.twitter.users.count()
         cls.assertEquals(True, result, msg, msg_success)
 
     # Lab 8.2 Ex.5.5
