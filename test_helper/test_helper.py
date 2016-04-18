@@ -279,14 +279,16 @@ class Test(object):
                     {"$sort": {"created_at": 1} }, {"$limit": 1}, {"$project": {"created_at": 1} }
                 ]))[0]['created_at']
         
-        col_name = 'bigdata_tweets_' + begin.strftime("%Y-%m-%d %H:%M:%S") + '_' + end.strftime("%Y-%m-%d %H:%M:%S")
+        col_name = 'bigdata_tweets_' + begin.strftime("%Y_%m_%d_%H_%M_%S") + '_' + end.strftime("%Y_%m_%d_%H_%M_%S")
         client.twitter[col_name+'2'].insert_many(new_col)
         
         if col_name in client.twitter.collection_names():
             try:
                 cls.assertEquals(True, client.twitter[col_name].count() == client.twitter[col_name+'2'], msg, msg_success)
             except:
-                cls.assertEquals(True, False, msg, msg_success)          
+                cls.assertEquals(True, False, msg, msg_success)       
+        else:
+            cls.assertEquals(True, False, msg, msg_success)   
         
     # Lab 8.2 Ex.5.5
     @classmethod
