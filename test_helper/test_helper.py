@@ -203,16 +203,16 @@ class Test(object):
 
     # Lab 8.2 Ex.5.1
     @classmethod
-    def existRecords(cls, key, client, msg="", msg_success=""):
-        cls.assertEquals(True, client.twitter.tweets.distinct(key) and client.twitter.users.distinct(key), msg, msg_success)
+    def existCollections(cls, client, msg="", msg_success=""):
+        cls.assertEquals(True, 'users' in client.twitter.collection_names() and 'tweets' in client.twitter.collection_names(), msg, msg_success)
 
     # Lab 8.2 Ex.5.2
     @classmethod
     def countRecord(cls, data, client, msg="", msg_success=""):
         result = client.twitter.tweets.count()
         cls.assertEquals(10000, result, msg, msg_success)
+   
     # Lab 8.2 Ex.5.3
-    
     @classmethod
     def existField(cls, data, client, msg="", msg_success=""):
         q_t = {
@@ -240,16 +240,22 @@ class Test(object):
         }
         result = client.twitter.tweets.count() == client.twitter.tweets.count(q_t) \
                  and client.twitter.users.count() == client.twitter.users.count(q_u)
+        if result:
+            for i in client.twitter.users.find():
+                if i['tweets'] != cls._tweets_ids(i['id']):
+                    result = False
+                    break
         cls.assertEquals(True, result, msg, msg_success)
         
-    # Lab 8.2 Ex.5.4
     @classmethod
-    def uniqueRecord(cls, data, client, msg="", msg_success=""):
-        result = client.twitter.tweets.distinct('id') == client.twitter.tweets.count() \
-                 and client.twitter.users.distinct('id') == client.twitter.users.count()
-        cls.assertEquals(True, result, msg, msg_success)
+    def _tweets_ids(cls, author_id):
+        return list( set( list(client.twitter.tweets.aggregate([
+            {"$match": {"author_id":author_id }},
+            {"$group": {"_id": {"author_id": "$author_id"}, "ids": {"$push": "$id"}} },
+            {"$project": {"ids": 1}}
+        ]))[0]['ids'] ) )
 
-    # Lab 8.2 Ex.5.5
+    # Lab 8.2 Ex.5.4
     @classmethod
     def bigDataTweets(cls, data, client, msg="", msg_success=""):
         td = timedelta(minutes=30)
@@ -266,7 +272,7 @@ class Test(object):
         result = client.twitter[col_name].count() == len(data)
         cls.assertEquals(True, result, msg, msg_success)
 
-    # Lab 8.2 Ex.5.6
+    # Lab 8.2 Ex.5.5
     @classmethod
     def top5Tweets(cls, data, client, msg="", msg_success=""):
         q = [
@@ -308,22 +314,7 @@ class Test(object):
                 result[lang['_id']['lang']].append(i)
         cls.assertEquals(data, result, msg, msg_success)
 
-    # Lab 8.2 Ex.5.7.0
-    @classmethod
-    def GetTweetsByIDS(cls,ids,client):
-        ids = list(set(ids))
-        result = {}
-        for i in list(client.twitter.tweets.aggregate([
-                {"$match": {"id":{"$in":ids}}},
-                {"$project": {'_id':-1,"id":1,"created_at":1,"text":1}}
-            ])):
-            del(i['_id'])
-            t = i.copy()
-            del(t['id'])
-            result[i['id']] = t
-        return result.values()
-
-    # Lab 8.2 Ex.5.7
+    # Lab 8.2 Ex.5.6
     @classmethod
     def timeZoneTweets(cls, data, client, msg="", msg_success=""):
         result = {}
@@ -357,6 +348,20 @@ class Test(object):
             t = list(client.twitter.users.aggregate(q))
             if(len(t)):
                 del(t[0]['_id'])
-                t[0]['tweets'] = cls.GetTweetsByIDS(t[0]['tweets'],client)
+                t[0]['tweets'] = cls._getTweetsByIDS(t[0]['tweets'], client)
                 result[i['_id']['time_zone']] = t[0]
         cls.assertEquals(data, result, msg, msg_success)
+        
+    @classmethod
+    def _getTweetsByIDS(cls, ids, client):
+        ids = list(set(ids))
+        result = {}
+        for i in list(client.twitter.tweets.aggregate([
+                {"$match": {"id":{"$in":ids}}},
+                {"$project": {'_id':-1,"id":1,"created_at":1,"text":1}}
+            ])):
+            del(i['_id'])
+            t = i.copy()
+            del(t['id'])
+            result[i['id']] = t
+        return result.values()
