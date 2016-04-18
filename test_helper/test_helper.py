@@ -210,7 +210,7 @@ class Test(object):
     @classmethod
     def countRecord(cls, data, client, msg="", msg_success=""):
         result = client.twitter.tweets.count()
-        cls.assertEquals(10000, result, msg, msg_success)
+        cls.assertEquals(2500, result, msg, msg_success)
    
     # Lab 8.2 Ex.5.3
     @classmethod
@@ -242,14 +242,14 @@ class Test(object):
                  and client.twitter.users.count() == client.twitter.users.count(q_u)
         if result:
             for i in client.twitter.users.find():
-                if i['tweets'] != cls._tweets_ids(i['id']):
+                if i['tweets'] != cls._tweets_ids(i['id'], client.twitter.tweets):
                     result = False
                     break
         cls.assertEquals(True, result, msg, msg_success)
         
     @classmethod
-    def _tweets_ids(cls, author_id):
-        return list( set( list(client.twitter.tweets.aggregate([
+    def _tweets_ids(cls, author_id, collection):
+        return list( set( list(collection.aggregate([
             {"$match": {"author_id":author_id }},
             {"$group": {"_id": {"author_id": "$author_id"}, "ids": {"$push": "$id"}} },
             {"$project": {"ids": 1}}
@@ -258,55 +258,47 @@ class Test(object):
     # Lab 8.2 Ex.5.4
     @classmethod
     def bigDataTweets(cls, data, client, msg="", msg_success=""):
-        td = timedelta(minutes=30)
-        start = list(client.twitter.tweets.aggregate([{"$sort":{"created_at":1}},{"$limit":1},{"$project": {"created_at":1}}]))[0]['created_at']
-        end = list(client.twitter.tweets.aggregate([{"$sort":{"created_at":-1}},{"$limit":1},{"$project": {"created_at":1}}]))[0]['created_at']
-        data = list(client.twitter.tweets.aggregate([{
-                    "$match":{
-                        "text":{"$regex":"#BigData"},
-                        "retweet_count":0,
-                        "created_at":{"$lte":end-td}
-                    }
-                }]))
-        col_name = 'bigdata_tweets_'+start.strftime("%Y-%m-%d %H:%M:%S")+'_'+end.strftime("%Y-%m-%d %H:%M:%S")
-        result = client.twitter[col_name].count() == len(data)
+        td = timedelta(minutes=60)
+        start = list(client.twitter.tweets.aggregate([
+                     {"$sort": {"created_at": 1} }, {"$limit": 1}, {"$project": {"created_at": 1} }
+                ]))[0]['created_at']
+        end = list(client.twitter.tweets.aggregate([
+                     {"$sort": {"created_at": -1} }, {"$limit": 1}, {"$project": {"created_at": 1} }
+                ]))[0]['created_at']
+        new_col = list(client.twitter.tweets.aggregate([{
+                        "$match":{
+                            "text": {"$regex": "#BigData"},
+                            "retweet_count":0,
+                            "lang": "en",
+                            "created_at": {"$gte": end-td}
+                        }
+                    }]))
+        
+        client.twitter['test000000'].insert_many(new_col)
+        begin = list(client.twitter.test000000.aggregate([
+                    {"$sort": {"created_at": 1} }, {"$limit": 1}, {"$project": {"created_at": 1} }
+                ]))[0]['created_at']
+        
+        col_name = 'bigdata_tweets_' + begin.strftime("%Y-%m-%d %H:%M:%S") + '_' + end.strftime("%Y-%m-%d %H:%M:%S")
+        client.twitter[col_name].insert_many(new_col)
+        
+        result = col_name in in client.twitter.collection_names() and client.twitter[col_name].count() == len(data)
         cls.assertEquals(True, result, msg, msg_success)
 
     # Lab 8.2 Ex.5.5
     @classmethod
     def top5Tweets(cls, data, client, msg="", msg_success=""):
         q = [
-            {
-                "$group": {
-                    "_id": {
-                        "lang": "$lang"
-                    }
-                }
-            },
-            {"$project": 
-                 {"_id":1}
-            }
+             {"$group": {"_id": {"lang": "$lang"}} },
+             {"$project": {"_id":1} }
         ]
         result = {}
         for lang in list(client.twitter.tweets.aggregate(q)):
             query = [
-                    {
-                        "$match":{
-                            "lang":lang['_id']['lang']
-                        }
-                    },
-                    {
-                      "$sort":  {
-                            "retweet_count": -1,
-                            "created_at": 1
-                        }
-                    },
-                    {"$project": 
-                         {"created_at":1,"author_name":1,"text":1,"_id":-1}
-                    },
-                    {
-                        "$limit":5
-                    }
+                     {"$match": {"lang":lang['_id']['lang']} },
+                     {"$sort": {"retweet_count": -1, "created_at": 1} },
+                     {"$project": {"created_at": 1, "author_name": 1, "text": 1, "_id": -1} },
+                     {"$limit":5}
                 ]
             result[lang['_id']['lang']] = []
             for i in list(client.twitter.tweets.aggregate(query)):
@@ -320,30 +312,11 @@ class Test(object):
         result = {}
         for i in list(client.twitter.users.aggregate([{"$group": {"_id": {"time_zone": "$time_zone"}}}])):
             q = [
-                {
-                   "$match": { 
-                        "time_zone":i['_id']['time_zone'],
-                        "$or":[
-                            {"lang":"en"},
-                            {"lang":"es"},
-                            {"lang":"fr"}
-                        ]
-                    }
-                },
-                {"$project": 
-                     {"name":1,"profile_image_url":1,"tweets":1,"ff":{"$add":["$friends_count","$followers_count"]}}
-                },
-                {
-                    "$sort": {
-                        "ff":-1
-                    }
-                },
-                {
-                    "$limit":1
-                },
-                {"$project": 
-                     {"name":1,"profile_image_url":1,"tweets":1}
-                }
+                 {"$match": {"time_zone": i['_id']['time_zone'], "$or":[ {"lang": "en"}, {"lang": "es"}, {"lang": "fr"} ]} },
+                 {"$project": {"name": 1, "profile_image_url": 1, "tweets": 1, "ff": {"$add": ["$friends_count", "$followers_count"]}} },
+                 {"$sort": {"ff": -1} },
+                 {"$limit": 1},
+                 {"$project": {"name": 1, "profile_image_url": 1, "tweets": 1} }
             ]
             t = list(client.twitter.users.aggregate(q))
             if(len(t)):
