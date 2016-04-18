@@ -257,7 +257,7 @@ class Test(object):
 
     # Lab 8.2 Ex.5.4
     @classmethod
-    def bigDataTweets(cls, data, client, msg="", msg_success=""):
+    def bigDataTweets(cls, client, msg="", msg_success=""):
         td = timedelta(minutes=60)
         start = list(client.twitter.tweets.aggregate([
                      {"$sort": {"created_at": 1} }, {"$limit": 1}, {"$project": {"created_at": 1} }
@@ -280,30 +280,33 @@ class Test(object):
                 ]))[0]['created_at']
         
         col_name = 'bigdata_tweets_' + begin.strftime("%Y-%m-%d %H:%M:%S") + '_' + end.strftime("%Y-%m-%d %H:%M:%S")
-        client.twitter[col_name].insert_many(new_col)
+        client.twitter[col_name+'2'].insert_many(new_col)
         
-        result = col_name in client.twitter.collection_names() and client.twitter[col_name].count() == len(data)
-        cls.assertEquals(True, result, msg, msg_success)
-
+        if col_name in client.twitter.collection_names():
+            try:
+                cls.assertEquals(True, client.twitter[col_name].count() == client.twitter[col_name+'2'], msg, msg_success)
+            except:
+                cls.assertEquals(True, False, msg, msg_success)          
+        
     # Lab 8.2 Ex.5.5
     @classmethod
     def top5Tweets(cls, data, client, msg="", msg_success=""):
-        q = [
-             {"$group": {"_id": {"lang": "$lang"}} },
-             {"$project": {"_id":1} }
-        ]
-        result = {}
-        for lang in list(client.twitter.tweets.aggregate(q)):
+        result_5 = {}
+        for lang in client.twitter.tweets.find().distinct("lang"):
             query = [
-                     {"$match": {"lang":lang['_id']['lang']} },
-                     {"$sort": {"retweet_count": -1, "created_at": 1} },
-                     {"$project": {"created_at": 1, "author_name": 1, "text": 1, "_id": -1} },
-                     {"$limit":5}
-                ]
-            result[lang['_id']['lang']] = []
-            for i in list(client.twitter.tweets.aggregate(query)):
+                     {"$match": {"lang": lang} },
+                     {"$group": {"_id": "$author_name", 
+                                 "author_name": {"$first": "$author_name"}, 
+                                 "created_at": {"$first": "$created_at"}, 
+                                 "retweet_count": {"$first": "$retweet_count"},
+                                 "text": {"$first": "$text"},}},
+                     {"$sort": {"retweet_count": -1, "author_name": 1} },
+                     {"$limit": 5}
+            ]
+            result_5[lang] = []
+            for i in client.twitter.tweets.aggregate(query):
                 del(i['_id'])
-                result[lang['_id']['lang']].append(i)
+                result_5[lang].append(i)
         cls.assertEquals(data, result, msg, msg_success)
 
     # Lab 8.2 Ex.5.6
@@ -311,13 +314,15 @@ class Test(object):
     def timeZoneTweets(cls, data, client, msg="", msg_success=""):
         result = {}
         for i in list(client.twitter.users.aggregate([{"$group": {"_id": {"time_zone": "$time_zone"}}}])):
-            q = [
-                 {"$match": {"time_zone": i['_id']['time_zone'], "$or":[ {"lang": "en"}, {"lang": "es"}, {"lang": "fr"} ]} },
-                 {"$project": {"name": 1, "profile_image_url": 1, "tweets": 1, "ff": {"$add": ["$friends_count", "$followers_count"]}} },
-                 {"$sort": {"ff": -1} },
-                 {"$limit": 1},
-                 {"$project": {"name": 1, "profile_image_url": 1, "tweets": 1} }
-            ]
+            tz = i['_id']['time_zone']
+            if tz is not None:
+                q = [
+                     {"$match": {"time_zone": tz, "$or":[ {"lang": "en"}, {"lang": "es"}, {"lang": "fr"} ]} },
+                     {"$project": {"name": 1, "profile_image_url": 1, "tweets": 1, "ff": {"$add":["$friends_count","$followers_count"]}} },
+                     {"$sort": {"ff": -1} },
+                     {"$limit": 1},
+                     {"$project": {"name": 1, "profile_image_url": 1, "tweets": 1} }
+                ]
             t = list(client.twitter.users.aggregate(q))
             if(len(t)):
                 del(t[0]['_id'])
