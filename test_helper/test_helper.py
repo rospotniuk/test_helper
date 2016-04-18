@@ -281,10 +281,7 @@ class Test(object):
         
         col_name = 'bigdata_tweets_' + begin.strftime("%Y_%m_%d_%H_%M_%S") + '_' + end.strftime("%Y_%m_%d_%H_%M_%S")
         client.twitter[col_name+'2'].insert_many(new_col)
-        
-        print col_name in client.twitter.collection_names()
-        print client.twitter[col_name].count()
-        print client.twitter[col_name+'2'].count()
+
         if col_name in client.twitter.collection_names():
             try:
                 cls.assertEquals(True, client.twitter[col_name].count() == client.twitter[col_name+'2'].count(), msg, msg_success)
