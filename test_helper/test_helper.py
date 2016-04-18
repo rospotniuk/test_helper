@@ -284,7 +284,7 @@ class Test(object):
         
         if col_name in client.twitter.collection_names():
             try:
-                cls.assertEquals(True, client.twitter[col_name].count() == client.twitter[col_name+'2'], msg, msg_success)
+                cls.assertEquals(True, client.twitter[col_name].count() == client.twitter[col_name+'2'].count(), msg, msg_success)
             except:
                 cls.assertEquals(True, False, msg, msg_success)       
         else:
