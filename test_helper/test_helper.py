@@ -293,7 +293,7 @@ class Test(object):
     # Lab 8.2 Ex.5.5
     @classmethod
     def top5Tweets(cls, data, client, msg="", msg_success=""):
-        result_5 = {}
+        result = {}
         for lang in client.twitter.tweets.find().distinct("lang"):
             query = [
                      {"$match": {"lang": lang} },
@@ -305,17 +305,17 @@ class Test(object):
                      {"$sort": {"retweet_count": -1, "author_name": 1} },
                      {"$limit": 5}
             ]
-            result_5[lang] = []
+            result[lang] = []
             for i in client.twitter.tweets.aggregate(query):
                 del(i['_id'])
-                result_5[lang].append(i)
+                result[lang].append(i)
         cls.assertEquals(data, result, msg, msg_success)
 
     # Lab 8.2 Ex.5.6
     @classmethod
     def timeZoneTweets(cls, data, client, msg="", msg_success=""):
         result = {}
-        for i in list(client.twitter.users.aggregate([{"$group": {"_id": {"time_zone": "$time_zone"}}}])):
+        for i in client.twitter.users.aggregate([{"$group": {"_id": {"time_zone": "$time_zone"}}}]):
             tz = i['_id']['time_zone']
             if tz is not None:
                 q = [
@@ -325,11 +325,11 @@ class Test(object):
                      {"$limit": 1},
                      {"$project": {"name": 1, "profile_image_url": 1, "tweets": 1} }
                 ]
-            t = list(client.twitter.users.aggregate(q))
-            if(len(t)):
-                del(t[0]['_id'])
-                t[0]['tweets'] = cls._getTweetsByIDS(t[0]['tweets'], client)
-                result[i['_id']['time_zone']] = t[0]
+                t = list(client.twitter.users.aggregate(q))
+                if(len(t)):
+                    del(t[0]['_id'])
+                    t[0]['tweets'] = cls._getTweetsByIDS(t[0]['tweets'], client)
+                    result[tz] = t[0]
         cls.assertEquals(data, result, msg, msg_success)
         
     @classmethod
