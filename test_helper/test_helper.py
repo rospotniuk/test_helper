@@ -7,6 +7,7 @@ from dateutil import parser
 import tweepy
 import json
 from datetime import timedelta
+from sklearn.metrics import accuracy_score
 
 
 class TestFailure(Exception):
@@ -101,7 +102,7 @@ class Test(object):
         image = Image.open(image_path)
         return image.size
     
-    # Some specific cases:
+    # Some specific cases:   
     # Lab 3.1 Ex. 4
     @classmethod
     def euclideanDistMatrix(cls, a, b, det, msg="", msg_success=""):
@@ -117,6 +118,76 @@ class Test(object):
         c = np.sqrt(np.power(a,2) + np.power(b,2))
         cls.assertEquals(det, np.linalg.det(c), msg, msg_success)
         
+    # Lab 5 Ex. 1.1
+    @classmethod
+    def checkClassifier(cls, classifier, tfidf_vectorizer, msg="", msg_success=""):
+        examples = [
+            'Free Viagra call today!', 
+            "I'm going to attend the Linux users group tomorrow.", 
+            'Pay the best price by the product',
+            'Explode your business right now',
+            'London is the capital of Great Britain',
+            'Important information regarding you job',
+            'Free Windows installation on your computer',
+            'The sky is blue',
+            'What Are the Differences Between the Rich and the Poor?',
+            'What are you waiting for?'
+        ]
+        try:
+            example_tfidf = tfidf_vectorizer.transform(examples)
+            predictions = classifier.predict(example_tfidf)
+            cls.assertEquals([1, 0, 1, 1, 0, 1, 1, 0, 0, 1], list(predictions), msg, msg_success)
+        except:
+            cls.assertEquals(False, True, msg, msg_success)
+    
+    # Lab 5 Ex. 1.2
+    @classmethod
+    def accuracy_scoreSpamHam1(cls, preds, msg="", msg_success=""):
+        preds = np.array(preds)
+        if preds.size != 1500:
+            cls.assertEquals(True, False, 'Incorrect amount of predicted labels', '')
+            return
+        y_test = np.loadtxt('spam_ham_test_labels.txt')
+        ac = accuracy_score(y_test, np.array(preds))
+        cls.assertEquals(True, ac > 0.75, msg, msg_success)
+    @classmethod
+    def accuracy_scoreSpamHam2(cls, preds, msg="", msg_success=""):
+        preds = np.array(preds)
+        if preds.size != 1500:
+            cls.assertEquals(True, False, 'Incorrect amount of predicted labels', '')
+            return
+        y_test = np.loadtxt('spam_ham_test_labels.txt')
+        ac = accuracy_score(y_test, np.array(preds))
+        cls.assertEquals(True, ac > 0.9, msg, msg_success)
+    @classmethod
+    def accuracy_scoreSpamHam3(cls, preds, msg="", msg_success=""):
+        preds = np.array(preds)
+        if preds.size != 1500:
+            cls.assertEquals(True, False, 'Incorrect amount of predicted labels', '')
+            return
+        y_test = np.loadtxt('spam_ham_test_labels.txt')
+        ac = accuracy_score(y_test, np.array(preds))
+        cls.assertEquals(True, ac > 0.95, msg, msg_success)
+    @classmethod
+    def accuracy_scoreSpamHam4(cls, preds, msg="", msg_success=""):
+        preds = np.array(preds)
+        if preds.size != 1500:
+            cls.assertEquals(True, False, 'Incorrect amount of predicted labels', '')
+            return
+        y_test = np.loadtxt('spam_ham_test_labels.txt')
+        ac = accuracy_score(y_test, np.array(preds))
+        cls.assertEquals(True, ac > 0.975, msg, msg_success)
+    @classmethod
+    def accuracy_scoreSpamHam5(cls, preds, msg="", msg_success=""):
+        preds = np.array(preds)
+        if preds.size != 1500:
+            cls.assertEquals(True, False, 'Incorrect amount of predicted labels', '')
+            return
+        y_test = np.loadtxt('spam_ham_test_labels.txt')
+        ac = accuracy_score(y_test, np.array(preds))
+        cls.assertEquals(True, ac > 0.9875, msg, msg_success)
+        
+    
     # Lab 8.1 Ex.1
     @classmethod
     def twitterFriendsList(cls, friends, url, auth, params, msg="", msg_success=""):
