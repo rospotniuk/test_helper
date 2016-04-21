@@ -223,7 +223,7 @@ class Test(object):
             return
         y_test = np.loadtxt('titanic_test_labels.txt')
         ac = accuracy_score(y_test, np.array(preds))
-        cls.assertEquals(True, ac > 0.8, msg, msg_success) 
+        cls.assertEquals(True, ac > 0.775, msg, msg_success) 
     @classmethod
     def accuracy_scoreTitanic5(cls, preds, msg="", msg_success=""):
         preds = np.array(preds)
@@ -232,7 +232,7 @@ class Test(object):
             return
         y_test = np.loadtxt('titanic_test_labels.txt')
         ac = accuracy_score(y_test, np.array(preds))
-        cls.assertEquals(True, ac > 0.825, msg, msg_success) 
+        cls.assertEquals(True, ac > 0.8, msg, msg_success) 
     
     # Lab 8.1 Ex.1
     @classmethod
