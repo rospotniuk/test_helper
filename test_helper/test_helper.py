@@ -187,6 +187,52 @@ class Test(object):
         ac = accuracy_score(y_test, np.array(preds))
         cls.assertEquals(True, ac > 0.9875, msg, msg_success)
         
+    # Lab 5 Ex. 2
+    @classmethod
+    def accuracy_scoreTitanic1(cls, preds, msg="", msg_success=""):
+        preds = np.array(preds)
+        if preds.size != 393:
+            cls.assertEquals(True, False, 'Incorrect amount of predicted labels', '')
+            return
+        y_test = np.loadtxt('titanic_test_labels.txt')
+        ac = accuracy_score(y_test, np.array(preds))
+        cls.assertEquals(True, ac > 0.5, msg, msg_success)   
+    @classmethod
+    def accuracy_scoreTitanic2(cls, preds, msg="", msg_success=""):
+        preds = np.array(preds)
+        if preds.size != 393:
+            cls.assertEquals(True, False, 'Incorrect amount of predicted labels', '')
+            return
+        y_test = np.loadtxt('titanic_test_labels.txt')
+        ac = accuracy_score(y_test, np.array(preds))
+        cls.assertEquals(True, ac > 0.7, msg, msg_success) 
+    @classmethod
+    def accuracy_scoreTitanic3(cls, preds, msg="", msg_success=""):
+        preds = np.array(preds)
+        if preds.size != 393:
+            cls.assertEquals(True, False, 'Incorrect amount of predicted labels', '')
+            return
+        y_test = np.loadtxt('titanic_test_labels.txt')
+        ac = accuracy_score(y_test, np.array(preds))
+        cls.assertEquals(True, ac > 0.75, msg, msg_success) 
+    @classmethod
+    def accuracy_scoreTitanic4(cls, preds, msg="", msg_success=""):
+        preds = np.array(preds)
+        if preds.size != 393:
+            cls.assertEquals(True, False, 'Incorrect amount of predicted labels', '')
+            return
+        y_test = np.loadtxt('titanic_test_labels.txt')
+        ac = accuracy_score(y_test, np.array(preds))
+        cls.assertEquals(True, ac > 0.8, msg, msg_success) 
+    @classmethod
+    def accuracy_scoreTitanic5(cls, preds, msg="", msg_success=""):
+        preds = np.array(preds)
+        if preds.size != 393:
+            cls.assertEquals(True, False, 'Incorrect amount of predicted labels', '')
+            return
+        y_test = np.loadtxt('titanic_test_labels.txt')
+        ac = accuracy_score(y_test, np.array(preds))
+        cls.assertEquals(True, ac > 0.825, msg, msg_success) 
     
     # Lab 8.1 Ex.1
     @classmethod
