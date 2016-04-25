@@ -8,6 +8,7 @@ import tweepy
 import json
 from datetime import timedelta
 from sklearn.metrics import accuracy_score
+from bs4 import BeautifulSoup
 
 
 class TestFailure(Exception):
@@ -234,7 +235,106 @@ class Test(object):
         ac = accuracy_score(y_test, np.array(preds))
         cls.assertEquals(True, ac > 0.8, msg, msg_success) 
     
-    # Lab 7.1
+    # Lab 7.1 Ex. 2
+    @classmethod
+    def checkScrappedData(cls, matrix_data, godfather_data, url_input, msg="", msg_success=""):
+        url = "http://www.imdb.com/search/title?sort=num_votes,desc&start=1&title_type=feature&year=1900,2015"
+        if url_input != url:
+            cls.assertEquals(True, False, 'Incorrect URL', '')
+            return
+        r = requests.get(url)
+        bs = BeautifulSoup(r.text, 'html.parser')
+        for movie in bs.findAll('td','title'):
+            title = movie.find('a').contents[0]
+            if title in ("The Matrix", "The Godfather"):
+                genres = movie.find('span','genre').findAll('a')
+
+                dirs, acts = str(movie.find('span','credit')).split("With:")
+                dirs = BeautifulSoup(dirs + '</span>')
+                acts = BeautifulSoup('<span>' + acts)
+
+                directors = []
+                for i in dirs.findAll('a'):
+                    try:
+                        i.contents[0]
+                        directors.append(cls._get_person_data('http://www.imdb.com' + i['href'], i.contents[0]))
+                    except:
+                        continue
+
+                actors = []
+                for i in acts.findAll('a'):
+                    try:
+                        i.contents[0]
+                        actors.append(cls._get_person_data('http://www.imdb.com' + i['href'], i.contents[0]))
+                    except:
+                        continue
+                data = {
+                        'title': title,
+                        'genres': [g.contents[0] for g in genres],
+                        'runtime': movie.find('span','runtime').contents[0].split()[0],
+                        'rating': movie.find('span','value').contents[0],
+                        'released': movie.find('span','year_type').contents[0][1:-1],
+                        'description':  movie.find('span', 'outline').contents[0],
+                        'directors': directors,
+                        'actors': actors,
+                    }
+                if title == "The Matrix":
+                    correct_matrix_data = data
+                elif title == "The Godfather":
+                    correct_godfather_data = data
+    
+        for data in (matrix_data, godfather_data):
+            for key, val in data.iteritems():
+                if key in ('actors', 'directors'):
+                    for i in matrix_data[key]:
+                        try:
+                            if i not in correct_matrix_data[key]:
+                                cls.assertEquals(True, False, msg, msg_success)
+                                return
+                        except:
+                            cls.assertEquals(True, False, msg, msg_success)
+                            return 
+                else:
+                    try:
+                        if matrix_data[key] != correct_matrix_data[key]:
+                            cls.assertEquals(True, False, msg, msg_success)
+                            return
+                    except:
+                        cls.assertEquals(True, False, msg, msg_success)
+                        return 
+        cls.assertEquals(True, True, msg, msg_success)
+  
+    @classmethod
+    def _get_person_data(cls, url, name):
+        res = {'name': name}
+        try:
+            text = requests.get(url).text
+        except:
+            return res
+        an_actor = BeautifulSoup(text, 'html.parser')
+        info = an_actor.find('table', attrs={'id': 'name-overview-widget-layout'})
+        image = info.find('div', 'image').find('img')
+        if image is not None:
+            res['image_url'] = image['src']
+        else: 
+            res['image_url'] = ''
+        birth_data = info.find('div', attrs={'id': 'name-born-info'})
+        if birth_data is not None:
+            res['born'] = birth_data.find('time')['datetime']
+            birth_place = birth_data.findAll('a')[-1].contents[0]
+            birth_place = birth_data.findAll('a')[-1].contents[0].split(',')
+            res['country'] = birth_place[-1].strip()
+            res['city'] = birth_place[0].strip()
+        else:
+            res['born'] = res['country'] = res['city'] = ''    
+        try:
+            death_data = info.find('div', attrs={'id': 'name-death-info'})
+            res['died'] = death_data.find('time')['datetime']
+        except:
+            res['died'] = ''
+        return res
+    
+    # Lab 7.2
     @classmethod
     def resetDatabaseRecords(cls):
         query = """ 
@@ -282,8 +382,7 @@ class Test(object):
             CREATE (carrieanne)-[:ACTED_IN { role: 'Trinity' }]->(matrix3)
         """
         return query
-        
-    
+
     # Lab 8.1 Ex. 1
     @classmethod
     def twitterFriendsList(cls, friends, url, auth, params, msg="", msg_success=""):
