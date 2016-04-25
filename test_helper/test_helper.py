@@ -238,8 +238,6 @@ class Test(object):
     @classmethod
     def resetDatabaseRecords(cls):
         query = """ 
-            MATCH (n) OPTIONAL MATCH (n)-[r]-() DELETE n,r
-            
             CREATE (hanks:Person { name:'Tom Hanks', born:1956, country:'USA' })
             CREATE (sinise:Person { name:'Gary Sinise', born:1955, country:'USA' })
             CREATE (zemeckis:Person { name:'Robert Zemeckis', born:1952, country:'USA' })
