@@ -234,6 +234,58 @@ class Test(object):
         ac = accuracy_score(y_test, np.array(preds))
         cls.assertEquals(True, ac > 0.8, msg, msg_success) 
     
+    # Lab 7.1
+    @classmethod
+    def resetDatabaseRecords(cls):
+        query = """ 
+            MATCH (n) OPTIONAL MATCH (n)-[r]-() DELETE n,r
+            
+            CREATE (hanks:Person { name:'Tom Hanks', born:1956, country:'USA' })
+            CREATE (sinise:Person { name:'Gary Sinise', born:1955, country:'USA' })
+            CREATE (zemeckis:Person { name:'Robert Zemeckis', born:1952, country:'USA' })
+            CREATE (forrest_gump:Movie { title:"Forrest Gump", released:1994, duration_min:142, 
+                                        country:"USA", lang:"English", box_office_Mdol:677.9 })
+            CREATE (hanks)-[:ACTED_IN {role:"Forrest Gump"}]->(forrest_gump)
+            CREATE (sinise)-[:ACTED_IN {role:"Lieutenant Dan Taylor"}]->(forrest_gump)
+            CREATE (zemeckis)-[:DIRECTED]->(forrest_gump)
+
+            CREATE (duncan:Person { name:'Michael Clarke Duncan', born:1957, country:'USA' })
+            CREATE (darabont:Person { name:'Frank Darabont', born:1959, country:'France' })
+            CREATE (king:Person { name:'Stephen King', born:1947, country:'USA' })
+            CREATE (green_mile:Movie { title:"The Green Mile", released:1999, duration_min:188, 
+                                        country:"USA", lang:"English", box_office_Mdol:290.7 })
+            CREATE (hanks)-[:ACTED_IN {role:"Paul Edgecomb"}]->(green_mile)
+            CREATE (sinise)-[:ACTED_IN {role:"Burt Hammersmith"}]->(green_mile)
+            CREATE (duncan)-[:ACTED_IN {role:"John Coffey"}]->(green_mile)
+            CREATE (darabont)-[:DIRECTED]->(green_mile)
+            CREATE (king)-[:BASED_ON]->(green_mile)
+
+            CREATE (single_actor:Person { name:'Sylvester Stallone', born:1946, country:'USA' })
+
+            CREATE (di_caprio:Person { name:'Leonardo DiCaprio', born:1974, country:'USA' })
+            CREATE (inception:Movie { title:"Inseption", released:2010, duration_min:148, 
+                                        country:"USA", lang:"English", box_office_Mdol:825.5 })
+            CREATE (di_caprio)-[:ACTED_IN]->(inception)
+
+            CREATE (matrix1:Movie { title: 'The Matrix', released: 1999, duration_min: 136, box_office_Mdol: 463.5 })
+            CREATE (matrix2:Movie { title: 'The Matrix Reloaded', released: 2003, duration_min: 138, box_office_Mdol: 742.1 })
+            CREATE (matrix3:Movie { title: 'The Matrix Revolutions', released: 2003, duration_min: 129, box_office_Mdol: 427.3 })
+            CREATE (keanu:Person { name: 'Keanu Reeves', born: 1964, country: "Canada" })
+            CREATE (laurence:Person { name: 'Laurence Fishburne', born: 1961, country: "USA" })
+            CREATE (carrieanne:Person { name: 'Carrie-Anne Moss', born: 1967, country: "Canada" })
+            CREATE (keanu)-[:ACTED_IN { role: 'Neo' }]->(matrix1)
+            CREATE (keanu)-[:ACTED_IN { role: 'Neo' }]->(matrix2)
+            CREATE (keanu)-[:ACTED_IN { role: 'Neo' }]->(matrix3)
+            CREATE (laurence)-[:ACTED_IN { role: 'Morpheus' }]->(matrix1)
+            CREATE (laurence)-[:ACTED_IN { role: 'Morpheus' }]->(matrix2)
+            CREATE (laurence)-[:ACTED_IN { role: 'Morpheus' }]->(matrix3)
+            CREATE (carrieanne)-[:ACTED_IN { role: 'Trinity' }]->(matrix1)
+            CREATE (carrieanne)-[:ACTED_IN { role: 'Trinity' }]->(matrix2)
+            CREATE (carrieanne)-[:ACTED_IN { role: 'Trinity' }]->(matrix3)
+        """
+        return query
+        
+    
     # Lab 8.1 Ex. 1
     @classmethod
     def twitterFriendsList(cls, friends, url, auth, params, msg="", msg_success=""):
