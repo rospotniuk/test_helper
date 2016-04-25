@@ -498,3 +498,18 @@ class Test(object):
                 exists = True
                 break
         cls.assertEquals(True, exists, msg, msg_success)
+        
+    # Lab 8.3 Ex. 4
+    @classmethod
+    def cassandraGarySinise(cls, data, msg="", msg_success=""):
+        correct = {'Forrest Gump': 'Lieutenant Dan Taylor', 'The Green Mile': 'Burt Hammersmith'}
+        yes = True
+        for key, val in data.iteritems():
+            try:
+                if correct[key] != val:
+                    yes = False
+                    break
+            except:
+                cls.assertEquals(True, False, msg, msg_success)
+                return
+        cls.assertEquals(True, yes, msg, msg_success)
