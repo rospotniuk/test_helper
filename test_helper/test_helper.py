@@ -237,16 +237,17 @@ class Test(object):
     
     # Lab 7.1 Ex. 2
     @classmethod
-    def checkScrappedData(cls, matrix_data, godfather_data, url_input, msg="", msg_success=""):
+    def checkScrappedData(cls, data, url_input, msg="", msg_success="", is_matrix_data=True):
         url = "http://www.imdb.com/search/title?sort=num_votes,desc&start=1&title_type=feature&year=1900,2015"
         if url_input != url:
             cls.assertEquals(True, False, 'Incorrect URL', '')
             return
         r = requests.get(url)
         bs = BeautifulSoup(r.text, 'html.parser')
+        compare_title = "The Matrix" if is_matrix_data else "The Godfather"
         for movie in bs.findAll('td','title'):
             title = movie.find('a').contents[0]
-            if title in ("The Matrix", "The Godfather"):
+            if title == compare_title:
                 genres = movie.find('span','genre').findAll('a')
 
                 dirs, acts = str(movie.find('span','credit')).split("With:")
@@ -268,7 +269,7 @@ class Test(object):
                         actors.append(cls._get_person_data('http://www.imdb.com' + i['href'], i.contents[0]))
                     except:
                         continue
-                data = {
+                correct_data = {
                         'title': title,
                         'genres': [g.contents[0] for g in genres],
                         'runtime': movie.find('span','runtime').contents[0].split()[0],
@@ -278,30 +279,25 @@ class Test(object):
                         'directors': directors,
                         'actors': actors,
                     }
-                if title == "The Matrix":
-                    correct_matrix_data = data
-                elif title == "The Godfather":
-                    correct_godfather_data = data
     
-        for data in (matrix_data, godfather_data):
-            for key, val in data.iteritems():
-                if key in ('actors', 'directors'):
-                    for i in matrix_data[key]:
-                        try:
-                            if i not in correct_matrix_data[key]:
-                                cls.assertEquals(True, False, msg, msg_success)
-                                return
-                        except:
-                            cls.assertEquals(True, False, msg, msg_success)
-                            return 
-                else:
+        for key, val in data.iteritems():
+            if key in ('actors', 'directors'):
+                for i in data[key]:
                     try:
-                        if matrix_data[key] != correct_matrix_data[key]:
+                        if i not in correct_data[key]:
                             cls.assertEquals(True, False, msg, msg_success)
                             return
                     except:
                         cls.assertEquals(True, False, msg, msg_success)
                         return 
+            else:
+                try:
+                    if data[key] != correct_data[key]:
+                        cls.assertEquals(True, False, msg, msg_success)
+                        return
+                except:
+                    cls.assertEquals(True, False, msg, msg_success)
+                    return 
         cls.assertEquals(True, True, msg, msg_success)
   
     @classmethod
