@@ -469,7 +469,7 @@ class Test(object):
         correct = { # '(movie_id, person_id)': rating
             '(2, 1)': 4.87, '(2, 2)': 4.87, '(2, 3)': 4.87, '(1, 1)': 4.5, '(1, 2)': 4.5, '(1, 3)': 4.5
         }
-        if len(data) != 6:
+        if len(data) < 6:
             cls.assertEquals(True, False, msg, msg_success)
             return
         for key, val in data.iteritems():
@@ -477,3 +477,24 @@ class Test(object):
                 cls.assertEquals(True, False, msg, msg_success)
                 return
         cls.assertEquals(True, True, msg, msg_success)
+        
+    # Lab 8.3 Ex. 2
+    @classmethod
+    def cassandraTaxi(cls, data, msg="", msg_success=""):
+        correct = {
+            'movie_released': 1998, 
+            'movie_title': u'Taxi', 
+            'person_role': u'', 
+            'movie_duration_min': 86, 
+            'person_name': u'Samy Naceri',
+            'movie_country': u'France',
+            'rating': None, 
+            'person_born': 1961, 
+            'person_country': u'France'
+        }
+        exists = False
+        for i in data:
+            if i == correct:
+                exists = True
+                break
+        cls.assertEquals(True, exists, msg, msg_success)
