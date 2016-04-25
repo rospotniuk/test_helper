@@ -234,7 +234,7 @@ class Test(object):
         ac = accuracy_score(y_test, np.array(preds))
         cls.assertEquals(True, ac > 0.8, msg, msg_success) 
     
-    # Lab 8.1 Ex.1
+    # Lab 8.1 Ex. 1
     @classmethod
     def twitterFriendsList(cls, friends, url, auth, params, msg="", msg_success=""):
         res = requests.get(url, auth=auth, params=params)
@@ -245,7 +245,7 @@ class Test(object):
         fr.sort(key=lambda x: -x['followers_count'])
         cls.assertEquals(friends, fr, msg, msg_success)
         
-    # Lab 8.1 Ex.2
+    # Lab 8.1 Ex. 2
     @classmethod
     def twitterRecentTweets(cls, tweets, url, auth, params, msg="", msg_success=""):
         res = requests.get(url, auth=auth, params=params)
@@ -261,7 +261,7 @@ class Test(object):
                     })
         cls.assertEquals(tweets, result, msg, msg_success)
         
-    # Lab 8.1 Ex.3
+    # Lab 8.1 Ex. 3
     @classmethod
     def twitterHashtagsTweets(cls, tweets, url, msg="", msg_success=""):
         if url != 'https://stream.twitter.com/1.1/statuses/filter.json?track=twitter,tweet,world':
@@ -293,7 +293,7 @@ class Test(object):
         diff = parser.parse(y).minute*60 + parser.parse(y).second - (parser.parse(x).minute*60 + parser.parse(x).second)
         cls.assertEquals(0 < diff <= 301, True, msg, msg_success)
     
-    # Lab 8.1 Ex.3
+    # Lab 8.1 Ex. 3
     @classmethod
     def twitterHashtagsTweetsCount(cls, amount_list, tweets, url, msg="", msg_success=""):
         if url != 'https://stream.twitter.com/1.1/statuses/filter.json?track=twitter,tweet,world':
@@ -311,25 +311,25 @@ class Test(object):
         except:
             cls.assertEquals(False, True, msg, msg_success)
     
-    # Lab 8.1 Ex.4
+    # Lab 8.1 Ex. 4
     @classmethod
     def twitterBillGates(cls, data, api, msg="", msg_success=""):
         BillGates = api.get_user("BillGates")
         result = {'created_at': BillGates.created_at, 'last_tweet_text': api.home_timeline(BillGates.id)[0].text}
         cls.assertEquals(data, result, msg, msg_success)
 
-    # Lab 8.2 Ex.5.1
+    # Lab 8.2 Ex. 5.1
     @classmethod
     def existCollections(cls, client, msg="", msg_success=""):
         cls.assertEquals(True, 'users' in client.twitter.collection_names() and 'tweets' in client.twitter.collection_names(), msg, msg_success)
 
-    # Lab 8.2 Ex.5.2
+    # Lab 8.2 Ex. 5.2
     @classmethod
     def countRecord(cls, data, client, msg="", msg_success=""):
         result = client.twitter.tweets.count()
         cls.assertEquals(2500, result, msg, msg_success)
    
-    # Lab 8.2 Ex.5.3
+    # Lab 8.2 Ex. 5.3
     @classmethod
     def existField(cls, data, client, msg="", msg_success=""):
         q_t = {
@@ -372,7 +372,7 @@ class Test(object):
             {"$project": {"ids": 1}}
         ]))[0]['ids'] ) )
 
-    # Lab 8.2 Ex.5.4
+    # Lab 8.2 Ex. 5.4
     @classmethod
     def bigDataTweets(cls, client, msg="", msg_success=""):
         td = timedelta(minutes=60)
@@ -407,7 +407,7 @@ class Test(object):
         else:
             cls.assertEquals(True, False, msg, msg_success)   
         
-    # Lab 8.2 Ex.5.5
+    # Lab 8.2 Ex. 5.5
     @classmethod
     def top5Tweets(cls, data, client, msg="", msg_success=""):
         result = {}
@@ -428,7 +428,7 @@ class Test(object):
                 result[lang].append(i)
         cls.assertEquals(data, result, msg, msg_success)
 
-    # Lab 8.2 Ex.5.6
+    # Lab 8.2 Ex. 5.6
     @classmethod
     def timeZoneTweets(cls, data, client, msg="", msg_success=""):
         result = {}
@@ -462,3 +462,18 @@ class Test(object):
             del(t['id'])
             result[i['id']] = t
         return result.values()
+
+    # Lab 8.3 Ex. 1
+    @classmethod
+    def cassandraRating(cls, data, msg="", msg_success=""):
+        correct = { # '(movie_id, person_id)': rating
+            '(2, 1)': 4.87, '(2, 2)': 4.87, '(2, 3)': 4.87, '(1, 1)': 4.5, '(1, 2)': 4.5, '(1, 3)': 4.5
+        }
+        if len(data) != 6:
+            cls.assertEquals(True, False, msg, msg_success)
+            return
+        for key, val in data.iteritems():
+            if correct[key] != round(val, 2):
+                cls.assertEquals(True, False, msg, msg_success)
+                return
+        cls.assertEquals(True, True, msg, msg_success)
