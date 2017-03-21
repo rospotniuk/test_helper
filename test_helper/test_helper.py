@@ -10,7 +10,6 @@ from datetime import timedelta
 from sklearn.metrics import accuracy_score
 from bs4 import BeautifulSoup
 
-
 class TestFailure(Exception):
     pass
 class PrivateTestFailure(Exception):
@@ -102,8 +101,8 @@ class Test(object):
     def _img_size(cls, image_path):
         image = Image.open(image_path)
         return image.size
-    
-    # Some specific cases:   
+
+    # Some specific cases:
     # Lab 3.1 Ex. 4
     @classmethod
     def euclideanDistMatrix(cls, a, b, det, msg="", msg_success=""):
@@ -118,13 +117,13 @@ class Test(object):
             return
         c = np.sqrt(np.power(a,2) + np.power(b,2))
         cls.assertEquals(det, np.linalg.det(c), msg, msg_success)
-        
+
     # Lab 5 Ex. 1.1
     @classmethod
     def checkClassifier(cls, classifier, tfidf_vectorizer, msg="", msg_success=""):
         examples = [
-            'Free Viagra call today!', 
-            "I'm going to attend the Linux users group tomorrow.", 
+            'Free Viagra call today!',
+            "I'm going to attend the Linux users group tomorrow.",
             'Pay the best price by the product',
             'Explode your business right now',
             'London is the capital of Great Britain',
@@ -140,7 +139,7 @@ class Test(object):
             cls.assertEquals([1, 0, 1, 1, 0, 1, 1, 0, 0, 1], list(predictions), msg, msg_success)
         except:
             cls.assertEquals(False, True, msg, msg_success)
-    
+
     # Lab 5 Ex. 1.2
     @classmethod
     def accuracy_scoreSpamHam1(cls, preds, msg="", msg_success=""):
@@ -187,7 +186,7 @@ class Test(object):
         y_test = np.loadtxt('spam_ham_test_labels.txt')
         ac = accuracy_score(y_test, np.array(preds))
         cls.assertEquals(True, ac > 0.9875, msg, msg_success)
-        
+
     # Lab 5 Ex. 2
     @classmethod
     def accuracy_scoreTitanic1(cls, preds, msg="", msg_success=""):
@@ -197,7 +196,7 @@ class Test(object):
             return
         y_test = np.loadtxt('titanic_test_labels.txt')
         ac = accuracy_score(y_test, np.array(preds))
-        cls.assertEquals(True, ac > 0.5, msg, msg_success)   
+        cls.assertEquals(True, ac > 0.5, msg, msg_success)
     @classmethod
     def accuracy_scoreTitanic2(cls, preds, msg="", msg_success=""):
         preds = np.array(preds)
@@ -206,7 +205,7 @@ class Test(object):
             return
         y_test = np.loadtxt('titanic_test_labels.txt')
         ac = accuracy_score(y_test, np.array(preds))
-        cls.assertEquals(True, ac > 0.7, msg, msg_success) 
+        cls.assertEquals(True, ac > 0.7, msg, msg_success)
     @classmethod
     def accuracy_scoreTitanic3(cls, preds, msg="", msg_success=""):
         preds = np.array(preds)
@@ -215,7 +214,7 @@ class Test(object):
             return
         y_test = np.loadtxt('titanic_test_labels.txt')
         ac = accuracy_score(y_test, np.array(preds))
-        cls.assertEquals(True, ac > 0.75, msg, msg_success) 
+        cls.assertEquals(True, ac > 0.75, msg, msg_success)
     @classmethod
     def accuracy_scoreTitanic4(cls, preds, msg="", msg_success=""):
         preds = np.array(preds)
@@ -224,7 +223,7 @@ class Test(object):
             return
         y_test = np.loadtxt('titanic_test_labels.txt')
         ac = accuracy_score(y_test, np.array(preds))
-        cls.assertEquals(True, ac > 0.775, msg, msg_success) 
+        cls.assertEquals(True, ac > 0.775, msg, msg_success)
     @classmethod
     def accuracy_scoreTitanic5(cls, preds, msg="", msg_success=""):
         preds = np.array(preds)
@@ -233,8 +232,8 @@ class Test(object):
             return
         y_test = np.loadtxt('titanic_test_labels.txt')
         ac = accuracy_score(y_test, np.array(preds))
-        cls.assertEquals(True, ac > 0.8, msg, msg_success) 
-    
+        cls.assertEquals(True, ac > 0.8, msg, msg_success)
+
     # Lab 7.1 Ex. 2
     @classmethod
     def checkScrappedData(cls, data, url_input, msg="", msg_success="", is_matrix_data=True):
@@ -279,7 +278,7 @@ class Test(object):
                         'directors': directors,
                         'actors': actors,
                     }
-    
+
         for key, val in data.iteritems():
             if key in ('actors', 'directors'):
                 for i in data[key]:
@@ -289,7 +288,7 @@ class Test(object):
                             return
                     except:
                         cls.assertEquals(True, False, msg, msg_success)
-                        return 
+                        return
             else:
                 try:
                     if data[key] != correct_data[key]:
@@ -297,9 +296,9 @@ class Test(object):
                         return
                 except:
                     cls.assertEquals(True, False, msg, msg_success)
-                    return 
+                    return
         cls.assertEquals(True, True, msg, msg_success)
-  
+
     @classmethod
     def _get_person_data(cls, url, name):
         res = {'name': name}
@@ -312,7 +311,7 @@ class Test(object):
         image = info.find('div', 'image').find('img')
         if image is not None:
             res['image_url'] = image['src']
-        else: 
+        else:
             res['image_url'] = ''
         birth_data = info.find('div', attrs={'id': 'name-born-info'})
         if birth_data is not None:
@@ -322,22 +321,22 @@ class Test(object):
             res['country'] = birth_place[-1].strip()
             res['city'] = birth_place[0].strip()
         else:
-            res['born'] = res['country'] = res['city'] = ''    
+            res['born'] = res['country'] = res['city'] = ''
         try:
             death_data = info.find('div', attrs={'id': 'name-death-info'})
             res['died'] = death_data.find('time')['datetime']
         except:
             res['died'] = ''
         return res
-    
+
     # Lab 7.2
     @classmethod
     def resetDatabaseRecords(cls):
-        query = """ 
+        query = """
             CREATE (hanks:Person { name:'Tom Hanks', born:1956, country:'USA' })
             CREATE (sinise:Person { name:'Gary Sinise', born:1955, country:'USA' })
             CREATE (zemeckis:Person { name:'Robert Zemeckis', born:1952, country:'USA' })
-            CREATE (forrest_gump:Movie { title:"Forrest Gump", released:1994, duration_min:142, 
+            CREATE (forrest_gump:Movie { title:"Forrest Gump", released:1994, duration_min:142,
                                         country:"USA", lang:"English", box_office_Mdol:677.9 })
             CREATE (hanks)-[:ACTED_IN {role:"Forrest Gump"}]->(forrest_gump)
             CREATE (sinise)-[:ACTED_IN {role:"Lieutenant Dan Taylor"}]->(forrest_gump)
@@ -346,7 +345,7 @@ class Test(object):
             CREATE (duncan:Person { name:'Michael Clarke Duncan', born:1957, country:'USA' })
             CREATE (darabont:Person { name:'Frank Darabont', born:1959, country:'France' })
             CREATE (king:Person { name:'Stephen King', born:1947, country:'USA' })
-            CREATE (green_mile:Movie { title:"The Green Mile", released:1999, duration_min:188, 
+            CREATE (green_mile:Movie { title:"The Green Mile", released:1999, duration_min:188,
                                         country:"USA", lang:"English", box_office_Mdol:290.7 })
             CREATE (hanks)-[:ACTED_IN {role:"Paul Edgecomb"}]->(green_mile)
             CREATE (sinise)-[:ACTED_IN {role:"Burt Hammersmith"}]->(green_mile)
@@ -357,7 +356,7 @@ class Test(object):
             CREATE (single_actor:Person { name:'Sylvester Stallone', born:1946, country:'USA' })
 
             CREATE (di_caprio:Person { name:'Leonardo DiCaprio', born:1974, country:'USA' })
-            CREATE (inception:Movie { title:"Inseption", released:2010, duration_min:148, 
+            CREATE (inception:Movie { title:"Inseption", released:2010, duration_min:148,
                                         country:"USA", lang:"English", box_office_Mdol:825.5 })
             CREATE (di_caprio)-[:ACTED_IN]->(inception)
 
@@ -389,7 +388,7 @@ class Test(object):
             fr.append({'name': i['name'], 'followers_count': i['followers_count']})
         fr.sort(key=lambda x: -x['followers_count'])
         cls.assertEquals(friends, fr, msg, msg_success)
-        
+
     # Lab 8.1 Ex. 2
     @classmethod
     def twitterRecentTweets(cls, tweets, url, auth, params, msg="", msg_success=""):
@@ -399,13 +398,13 @@ class Test(object):
         for i in data:
             if i['retweet_count'] > 0:
                 result.append({
-                        'created_at':i['created_at'], 
-                        'author':i['user']['name'], 
-                        'text':i['text'], 
+                        'created_at':i['created_at'],
+                        'author':i['user']['name'],
+                        'text':i['text'],
                         'retweet_count': i['retweet_count']
                     })
         cls.assertEquals(tweets, result, msg, msg_success)
-        
+
     # Lab 8.1 Ex. 3
     @classmethod
     def twitterHashtagsTweets(cls, tweets, url, msg="", msg_success=""):
@@ -437,7 +436,7 @@ class Test(object):
                 i -= 1
         diff = parser.parse(y).minute*60 + parser.parse(y).second - (parser.parse(x).minute*60 + parser.parse(x).second)
         cls.assertEquals(0 < diff <= 301, True, msg, msg_success)
-    
+
     # Lab 8.1 Ex. 3
     @classmethod
     def twitterHashtagsTweetsCount(cls, amount_list, tweets, url, msg="", msg_success=""):
@@ -455,7 +454,7 @@ class Test(object):
             cls.assertEquals(x, amount_list, msg, msg_success)
         except:
             cls.assertEquals(False, True, msg, msg_success)
-    
+
     # Lab 8.1 Ex. 4
     @classmethod
     def twitterBillGates(cls, data, api, msg="", msg_success=""):
@@ -473,7 +472,7 @@ class Test(object):
     def countRecord(cls, data, client, msg="", msg_success=""):
         result = client.twitter.tweets.count()
         cls.assertEquals(2500, result, msg, msg_success)
-   
+
     # Lab 8.2 Ex. 5.3
     @classmethod
     def existField(cls, data, client, msg="", msg_success=""):
@@ -508,7 +507,7 @@ class Test(object):
                     result = False
                     break
         cls.assertEquals(True, result, msg, msg_success)
-        
+
     @classmethod
     def _tweets_ids(cls, author_id, collection):
         return list( set( list(collection.aggregate([
@@ -535,12 +534,12 @@ class Test(object):
                             "created_at": {"$gte": end-td}
                         }
                     }]))
-        
+
         client.twitter['test000000'].insert_many(new_col)
         begin = list(client.twitter.test000000.aggregate([
                     {"$sort": {"created_at": 1} }, {"$limit": 1}, {"$project": {"created_at": 1} }
                 ]))[0]['created_at']
-        
+
         col_name = 'bigdata_tweets_' + begin.strftime("%Y_%m_%d_%H_%M_%S") + '_' + end.strftime("%Y_%m_%d_%H_%M_%S")
         client.twitter[col_name+'2'].insert_many(new_col)
 
@@ -548,10 +547,10 @@ class Test(object):
             try:
                 cls.assertEquals(True, client.twitter[col_name].count() == client.twitter[col_name+'2'].count(), msg, msg_success)
             except:
-                cls.assertEquals(True, False, msg, msg_success)       
+                cls.assertEquals(True, False, msg, msg_success)
         else:
-            cls.assertEquals(True, False, msg, msg_success)   
-        
+            cls.assertEquals(True, False, msg, msg_success)
+
     # Lab 8.2 Ex. 5.5
     @classmethod
     def top5Tweets(cls, data, client, msg="", msg_success=""):
@@ -559,9 +558,9 @@ class Test(object):
         for lang in client.twitter.tweets.find().distinct("lang"):
             query = [
                      {"$match": {"lang": lang} },
-                     {"$group": {"_id": "$author_name", 
-                                 "author_name": {"$first": "$author_name"}, 
-                                 "created_at": {"$first": "$created_at"}, 
+                     {"$group": {"_id": "$author_name",
+                                 "author_name": {"$first": "$author_name"},
+                                 "created_at": {"$first": "$created_at"},
                                  "retweet_count": {"$first": "$retweet_count"},
                                  "text": {"$first": "$text"},}},
                      {"$sort": {"retweet_count": -1, "author_name": 1} },
@@ -593,7 +592,7 @@ class Test(object):
                     t[0]['tweets'] = cls._getTweetsByIDS(t[0]['tweets'], client)
                     result[tz] = t[0]
         cls.assertEquals(data, result, msg, msg_success)
-        
+
     @classmethod
     def _getTweetsByIDS(cls, ids, client):
         ids = list(set(ids))
@@ -622,19 +621,19 @@ class Test(object):
                 cls.assertEquals(True, False, msg, msg_success)
                 return
         cls.assertEquals(True, True, msg, msg_success)
-        
+
     # Lab 8.3 Ex. 2
     @classmethod
     def cassandraTaxi(cls, data, msg="", msg_success=""):
         correct = {
-            'movie_released': 1998, 
-            'movie_title': u'Taxi', 
-            'person_role': u'', 
-            'movie_duration_min': 86, 
+            'movie_released': 1998,
+            'movie_title': u'Taxi',
+            'person_role': u'',
+            'movie_duration_min': 86,
             'person_name': u'Samy Naceri',
             'movie_country': u'France',
-            'rating': None, 
-            'person_born': 1961, 
+            'rating': None,
+            'person_born': 1961,
             'person_country': u'France'
         }
         exists = False
@@ -643,7 +642,7 @@ class Test(object):
                 exists = True
                 break
         cls.assertEquals(True, exists, msg, msg_success)
-        
+
     # Lab 8.3 Ex. 4
     @classmethod
     def cassandraGarySinise(cls, data, msg="", msg_success=""):
@@ -658,3 +657,22 @@ class Test(object):
                 cls.assertEquals(True, False, msg, msg_success)
                 return
         cls.assertEquals(True, yes, msg, msg_success)
+
+    @classmethod
+    def checkLDAModel(cls,model, corpus, result, number):
+        cls.assertEquals(model.passes, 20, "Passes value is incorrect", "Exercise %d.1 is successful" % number)
+        tt = model.top_topics(corpus, 3)
+        check = [[word[1] for word in [sub[0] for sub in tt][0]], [word[1] for word in [sub[0] for sub in tt][1]]]
+        cls.assertEquals(result, check, "There is a mistake","Exercise %d.2 is successful" % number)
+
+
+    @classmethod
+    def checkDoc2Vec(cls,model, result, number):
+        cls.assertEquals(model.window, 15, "window value is incorrect", "Exercise %d.1 is successful" % number )
+        cls.assertEquals(model.min_count, 1,"min_count value is incorrect", "Exercise %d.2 is successful" % number)
+        cls.assertEquals(model.sample, 1e-4, "sample value is incorrect", "Exercise %d.3 is successful" % number)
+        cls.assertEquals(model.negative, 5, "negative value is incorrect", "Exercise %d.4 is successful" % number)
+        cls.assertEquals(model.seed, 42, "seed value is incorrect", "Exercise %d.5 is successful" % number)
+        cls.assertEquals([elem[0] for elem in model.most_similar('google')], result, "There is a mistake", "Exercise %d.6 is successful" % number)
+
+
