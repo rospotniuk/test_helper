@@ -9,6 +9,7 @@ import json
 from datetime import timedelta
 from sklearn.metrics import accuracy_score
 from bs4 import BeautifulSoup
+import gensim
 
 class TestFailure(Exception):
     pass
@@ -658,12 +659,19 @@ class Test(object):
                 return
         cls.assertEquals(True, yes, msg, msg_success)
 
-    @classmethod
-    def checkLDAModel(cls,model, corpus, result, number):
-        cls.assertEquals(model.passes, 20, "Passes value is incorrect", "Exercise %d.1 is successful" % number)
+    
+    @classmethod    
+    def checkLDAModel(cls, model, corpus, result, number):		
+        load_dict = gensim.corpora.Dictionary.load("ex3dict.txt")
+        cls.assertEquals(model.id2word,load_dict,'Dictionary is incorrect', 'Exercise %d.1 is successful' %number)
+        with open('ex3corpus.txt','r') as fobj:
+            load_corpus = fobj.read();        
+        cls.assertEquals(str(corpus), load_corpus,'Corpus is incorrect', 'Exercise %d.2 is successful' % number)
+        cls.assertEquals(model.passes, 20, "Passes value is incorrect", "Exercise %d.3 is successful" % number)
         tt = model.top_topics(corpus, 3)
         check = [[word[1] for word in [sub[0] for sub in tt][0]], [word[1] for word in [sub[0] for sub in tt][1]]]
-        cls.assertEquals(result, check, "There is a mistake","Exercise %d.2 is successful" % number)
+        cls.assertEquals(result, check, "There is a mistake","Exercise %d.4 is successful" % number)
+
 
 
     @classmethod
