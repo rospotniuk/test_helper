@@ -111,7 +111,7 @@ class Test(object):
             print 'Arrays "a" and "b" should be numpy arrays'
             cls.assertEquals(False, True, msg, msg_success)
             return
-        mask = lambda x: len(zip(*np.where((x < -100) | (x > 100)))) == 0 and x.dtype == 'int64'
+        mask = lambda x: len(zip(*np.where((x < -100) | (x > 100)))) == 0 and 'int' in str(x.dtype)
         if not mask(a) or not mask(b):
             print 'Arrays "a" and "b" should contain integer numbers from -100 to 100'
             cls.assertEquals(False, True, msg, msg_success)
