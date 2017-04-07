@@ -659,7 +659,6 @@ class Test(object):
                 return
         cls.assertEquals(True, yes, msg, msg_success)
 
-
     @classmethod
     def checkLDAModel(cls, model, corpus, result, number):
         path_to_data = site.getsitepackages()[0]+"/test_helper/data/"
@@ -667,13 +666,11 @@ class Test(object):
         cls.assertEquals(model.id2word.id2token,load_dict.id2token,'Dictionary is incorrect', 'Exercise %d.1 is successful' %number)
         with open(path_to_data + 'ex3corpus.txt','r') as fobj:
             load_corpus = fobj.read();
-
         cls.assertEquals(str(corpus), load_corpus,'Corpus is incorrect', 'Exercise %d.2 is successful' % number)
         cls.assertEquals(model.passes, 20, "Passes value is incorrect", "Exercise %d.3 is successful" % number)
         tt = model.top_topics(corpus, 3)
         check = [[word[1] for word in [sub[0] for sub in tt][0]], [word[1] for word in [sub[0] for sub in tt][1]]]
         cls.assertEquals(result, check, "There is a mistake","Exercise %d.4 is successful" % number)
-
 
     @classmethod
     def checkDoc2Vec(cls,model, result, number):
@@ -683,16 +680,3 @@ class Test(object):
         cls.assertEquals(model.negative, 5, "negative value is incorrect", "Exercise %d.4 is successful" % number)
         cls.assertEquals(model.seed, 42, "seed value is incorrect", "Exercise %d.5 is successful" % number)
         cls.assertEquals([elem[0] for elem in model.most_similar('google')], result, "There is a mistake", "Exercise %d.6 is successful" % number)
-<<<<<<< HEAD
-=======
-
-    @classmethod
-    def load_textie(cls, fname):
-        import pkg_resources
-        resource_package = __name__  # Could be any module/package name
-        resource_path = '/'.join(('data', 'ex3dict.txt'))  # Do not use os.path.join(), see below
-        template = pkg_resources.resource_string(resource_package, resource_path)
-        print(template)
-        # or for a file-like stream:
-        #template = pkg_resources.resource_stream(resource_package, resource_path)
->>>>>>> 2f841779c306cc5539bf4f963f5c6f74c0be12d8
