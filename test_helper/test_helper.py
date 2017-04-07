@@ -664,7 +664,9 @@ class Test(object):
     def checkLDAModel(cls, model, corpus, result, number):
         path_to_data = site.getsitepackages()[0]+"/test_helper/data/"
         load_dict = gensim.corpora.Dictionary.load(path_to_data + "ex3dict.txt")
-        cls.assertEquals(model.id2word.id2token,load_dict.id2token,'Dictionary is incorrect', 'Exercise %d.1 is successful' %number)
+        a = [i[1] for i in model.id2word.id2token.items()]
+        b = [i[1] for i in load_dict.id2token.items()]
+        cls.assertEquals(sorted(a),sorted(b),'Dictionary is incorrect', 'Exercise %d.1 is successful' %number)
         with open(path_to_data + 'ex3corpus.txt','r') as fobj:
             load_corpus = fobj.read();
         cls.assertEquals(str(corpus), load_corpus,'Corpus is incorrect', 'Exercise %d.2 is successful' % number)
