@@ -684,6 +684,11 @@ class Test(object):
         cls.assertEquals([elem[0] for elem in model.most_similar('google')], result, "There is a mistake", "Exercise %d.6 is successful" % number)
 
     @classmethod
-    def load_textie(fname):
-        load = open('data/'+fname)
-        print load.read()
+    def load_textie(cls, fname):
+        import pkg_resources
+        resource_package = __name__  # Could be any module/package name
+        resource_path = '/'.join(('data', 'ex3dict.txt'))  # Do not use os.path.join(), see below
+        template = pkg_resources.resource_string(resource_package, resource_path)
+        print(template)
+        # or for a file-like stream:
+        #template = pkg_resources.resource_stream(resource_package, resource_path)
