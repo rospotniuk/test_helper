@@ -659,13 +659,13 @@ class Test(object):
                 return
         cls.assertEquals(True, yes, msg, msg_success)
 
-    
-    @classmethod    
-    def checkLDAModel(cls, model, corpus, result, number):		
+
+    @classmethod
+    def checkLDAModel(cls, model, corpus, result, number):
         load_dict = gensim.corpora.Dictionary.load("data/ex3dict.txt")
         cls.assertEquals(model.id2word,load_dict,'Dictionary is incorrect', 'Exercise %d.1 is successful' %number)
         with open('data/ex3corpus.txt','r') as fobj:
-            load_corpus = fobj.read();        
+            load_corpus = fobj.read();
         cls.assertEquals(str(corpus), load_corpus,'Corpus is incorrect', 'Exercise %d.2 is successful' % number)
         cls.assertEquals(model.passes, 20, "Passes value is incorrect", "Exercise %d.3 is successful" % number)
         tt = model.top_topics(corpus, 3)
@@ -683,8 +683,7 @@ class Test(object):
         cls.assertEquals(model.seed, 42, "seed value is incorrect", "Exercise %d.5 is successful" % number)
         cls.assertEquals([elem[0] for elem in model.most_similar('google')], result, "There is a mistake", "Exercise %d.6 is successful" % number)
 
-	
-	@classmethod
-	def load_textie(fname):
-		load = open('data/'+fname)
-		print load.read()
+    @classmethod
+    def load_textie(fname):
+        load = open('data/'+fname)
+        print load.read()
