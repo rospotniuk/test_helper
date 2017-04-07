@@ -683,4 +683,7 @@ class Test(object):
         cls.assertEquals(model.seed, 42, "seed value is incorrect", "Exercise %d.5 is successful" % number)
         cls.assertEquals([elem[0] for elem in model.most_similar('google')], result, "There is a mistake", "Exercise %d.6 is successful" % number)
 
-
+	@classmethod
+	def load_textie(fname):
+		load = open('data/'+fname)
+		print load.read()
